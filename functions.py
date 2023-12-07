@@ -9,6 +9,8 @@ import datetime as dt
 import streamlit as st
 import requests
 import utm
+import os
+import io
 
 lc.setlocale(lc.LC_ALL,'es_ES.UTF-8')
 
@@ -20,9 +22,18 @@ def textreaderFurow(file):
 
     dictFurow = dict()
 
-    with open(file, 'r') as f:
-        # Read the lines and split by tabs to create a list of lists
-        lines = [line.strip().split('\t') for line in f.readlines()]
+    lines = file.getvalue().decode('ANSI').split('\r\n')
+
+    lines = [line.strip().split('\t') for line in lines]
+    
+# #   lines = [line.strip().split('\t') for line in f.readlines()]
+
+#     try:
+#         file = file.getvalue().decode('utf-8')
+#     except Exception as e:
+#         file = file.getvalue().decode('ANSI')
+
+#     lines = [line.strip().split('\t') for line in file]
 
     # Get key values
     for i, row in enumerate(lines):
@@ -120,12 +131,12 @@ def utm_to_latLon(dict):
 
 @st.cache_data
 def countryValues():
-    df_countries = pd.read_csv('../countries.csv').sort_values(by='Country')
+    df_countries = pd.read_csv('countries.csv').sort_values(by='Country')
     return df_countries
 
 @st.cache_data
 def countryDf(directory):
-    df_country = pd.read_csv(directory).sort_values(by='Country')
+    df_country = pd.read_csv(directory)
     return df_country
 
 
