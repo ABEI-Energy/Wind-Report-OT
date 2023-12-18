@@ -9,8 +9,7 @@ import datetime as dt
 import streamlit as st
 import requests
 import utm
-import os
-import io
+
 
 lc.setlocale(lc.LC_ALL,'es_ES.UTF-8')
 
@@ -25,15 +24,6 @@ def textreaderFurow(file):
     lines = file.getvalue().decode('ANSI').split('\r\n')
 
     lines = [line.strip().split('\t') for line in lines]
-    
-# #   lines = [line.strip().split('\t') for line in f.readlines()]
-
-#     try:
-#         file = file.getvalue().decode('utf-8')
-#     except Exception as e:
-#         file = file.getvalue().decode('ANSI')
-
-#     lines = [line.strip().split('\t') for line in file]
 
     # Get key values
     for i, row in enumerate(lines):
@@ -61,7 +51,8 @@ def textreaderFurow(file):
 
     # Calculamos el centroide del parque
     dictFurow['latUTMProj'] = df['Y [m]'].apply(float).sum()/df['Y [m]'].count()
-    dictFurow['longUTMProj'] = df['X [m]'].apply(float).sum()/df['X [m]'].count()
+    dictFurow['longUTMProj'] = df['X [m]'].apply(float).sum()/df['X [m]'].count()    
+
     return dictFurow, df
 
 @st.cache_data
@@ -89,6 +80,11 @@ def dictMaker(dict, program, df):
         dict['rotorSize'] = df['Rotor Diameter [m]'].unique()[0]
         dict['turbinePower'] = df['Capacity [kW]'].unique()[0]
 
+        utm_to_latLon(dict)
+
+        get_elevation(dict)
+
+
 
     else:
         pass
@@ -100,13 +96,17 @@ def initials(user):
     for word in user:
         auxUser.append([*word][0])
     user = '.'.join(auxUser)
+    return user
 
 @st.cache_data
 def normalize(string):
     return str(string.replace(",", "."))
 
 @st.cache_data
-def get_elevation(lat, lon):
+def get_elevation(dict):
+
+    lat = dict['latProj']
+    lon = dict['longProj']
     url = ('https://api.opentopodata.org/v1/test-dataset'f'?locations={lat},{lon}')
     while True:
         try:
@@ -117,34 +117,34 @@ def get_elevation(lat, lon):
    
     elevation = response['results'][0]['elevation']
 
-    return elevation 
+    dict['altProj'] = elevation
 
 @st.cache_data
 def utm_to_latLon(dict):
     lat_utm = float(dict['latUTMProj'])
     long_utm = float(dict['longUTMProj'])
-    huso = float(dict['husoUTM'].split(' ')[0])
+    huso = int(dict['husoUTM'].split(' ')[0])
     zone = dict['husoUTM'].split(' ')[-1].strip()
-    coordinates = utm.to_latlon(lat_utm, long_utm, huso, zone)
+    coordinates = utm.to_latlon(long_utm, lat_utm, huso, zone)
     dict['latProj'] = coordinates[0]
     dict['longProj'] = coordinates[-1]
+    dict.update(dict)
 
 @st.cache_data
 def countryValues():
-    df_countries = pd.read_csv('countries.csv').sort_values(by='Country')
+    df_countries = pd.read_csv('countries.csv', index_col=None).sort_values(by='Country')
     return df_countries
 
 @st.cache_data
-def countryDf(directory):
-    df_country = pd.read_csv(directory)
-    return df_country
+def ms_reader(directory):
+    
+    if 'csv' in directory:
+        df = pd.read_csv(directory, index_col=None)
 
+    elif 'xlsx' in directory:
+        pass
 
-
-
-
-
-
+    return df
 
 
 
