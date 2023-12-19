@@ -146,7 +146,59 @@ def ms_reader(directory):
 
     return df
 
+@st.cache_data
+def model_reader(directory):
+    
+    xls = pd.ExcelFile(directory)
+
+    df_power = pd.read_excel(xls, 'Sheet3', index_col=None, header = None)
+    df_thrust = pd.read_excel(xls, 'Sheet4', index_col=None, header = None)
+
+    df_power.drop([0,1,2,3], inplace = True)
+    df_power.drop([0], axis = 1, inplace = True)
+    df_power.rename(columns = df_power.iloc[0].apply(str), inplace = True)
+    df_power.reset_index(inplace = True, drop = True)
+    df_power.drop([0], inplace = True)
+    df_power.set_index(df_power.iloc[:, 0].apply(str), inplace = True)
+    df_power.index.names = ['Wind speed']
+    df_power.drop(df_power.columns[0], axis = 1, inplace = True)
+    # df_power['Wind speed'] = df_power.index
+    df_power.reset_index(inplace = True)
+    df_power.sort_values(by = 'Wind speed')
+    
+    # df_power = df_power.apply(float)
+
+    df_thrust.drop([0,1,2,3], inplace = True)
+    df_thrust.drop([0], axis = 1, inplace = True)
+    df_thrust.rename(columns = df_thrust.iloc[0].apply(str), inplace = True)
+    df_thrust.reset_index(inplace = True, drop = True)
+    df_thrust.drop([0], inplace = True)
+    df_thrust.set_index(df_thrust.iloc[:, 0].apply(str), inplace = True)
+    df_thrust.index.names = ['Wind speed']
+    df_thrust.drop(df_thrust.columns[0], axis = 1, inplace = True)
+    # df_thrust['Wind speed'] = df_thrust.index
+
+    df_thrust.reset_index(inplace = True)
+    df_thrust.sort_values(by = 'Wind speed')
+    # df_thrust = df_thrust.apply(float)
+
+    st.dataframe(df_power)
+
+    # We have to choose the columns with 1.225, and would they not exist, interpolate them
+
+    try:
+        st.line_chart(df_power)
+        pass
+        pass
+    except Exception as e:
+        print(e)
+        st.write('fuck')
 
 
 
+
+
+
+
+    return df_power, df_thrust
 

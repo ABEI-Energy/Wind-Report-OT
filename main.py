@@ -53,20 +53,27 @@ for uploadedFile in uploadedFiles:
         dict, df = textreaderFurow(uploadedFile)
 
         stDict.update(dict)
-
-        # dictMaker(stDict, stDict['softwareWind'], df)
-
-        st.text(stDict)
-
         
-        flagDict = False
+        flagDict = True
 
     elif uploadedFile.name.endswith('xlsx'):
 
-        xls = pd.ExcelFile(uploadedFile)
+        df_power, df_thrust = model_reader(uploadedFile)
+        # df_power.drop([0,1,2], inplace = True)
+        data = {
+  "calories": [420, 380, 390],
+  "duration": [50, 40, 45]
+}
+        # st.dataframe(data)
+        # st.line_chart(data, x = 'calories', y = 'duration')
+        st.line_chart(df_power, y = 'Wind speed')
 
-        df_power = pd.read_excel(xls, 'Sheet3')
-        df_thrust = pd.read_excel(xls, 'Sheet4')
+        df_power.astype(float)
+        # st.line_chart(df_power, x = 'Wind speed', y = '1.125')
+
+    pass
+
+
 
 
 
@@ -140,13 +147,13 @@ if country:
 
 
 
-stDict['numYears'] = st.selectbox('Years of the historical data', range(1,15), index = None)
+stDict['numYears'] = st.selectbox('Years of the historical data', range(1,15))
 
 if flagDict:
 
     dictMaker(stDict, stDict['softwareWind'], df)
 
-
+st.dataframe(stDict)
 pass
 
 
