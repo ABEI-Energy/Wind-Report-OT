@@ -9,6 +9,10 @@ import datetime as dt
 import streamlit as st
 import requests
 import utm
+from docx import Document
+from PIL import Image
+from docx.shared import Cm
+import io
 
 
 lc.setlocale(lc.LC_ALL,'es_ES.UTF-8')
@@ -84,6 +88,14 @@ def dictMaker(dict, program, df):
 
         get_elevation(dict)
 
+        dict.update(dict)
+
+        st.session_state.dict = True
+
+        return True
+
+
+
 
 
     else:
@@ -151,6 +163,9 @@ def model_reader(directory):
     
     xls = pd.ExcelFile(directory)
 
+    df_data = pd.read_excel(xls, 'Sheet1', index_col=None, header = None)
+
+
     df_power = pd.read_excel(xls, 'Sheet3', index_col=None, header = None)
     df_thrust = pd.read_excel(xls, 'Sheet4', index_col=None, header = None)
 
@@ -160,13 +175,12 @@ def model_reader(directory):
     df_power.reset_index(inplace = True, drop = True)
     df_power.drop([0], inplace = True)
     df_power.set_index(df_power.iloc[:, 0].apply(str), inplace = True)
-    df_power.index.names = ['Wind speed']
+    df_power.index.names = ['Wind Speed']
     df_power.drop(df_power.columns[0], axis = 1, inplace = True)
-    # df_power['Wind speed'] = df_power.index
     df_power.reset_index(inplace = True)
-    df_power.sort_values(by = 'Wind speed')
+    df_power.sort_values(by = 'Wind Speed')
     
-    # df_power = df_power.apply(float)
+    df_power = df_power.astype(float)
 
     df_thrust.drop([0,1,2,3], inplace = True)
     df_thrust.drop([0], axis = 1, inplace = True)
@@ -174,31 +188,233 @@ def model_reader(directory):
     df_thrust.reset_index(inplace = True, drop = True)
     df_thrust.drop([0], inplace = True)
     df_thrust.set_index(df_thrust.iloc[:, 0].apply(str), inplace = True)
-    df_thrust.index.names = ['Wind speed']
+    df_thrust.index.names = ['Wind Speed']
     df_thrust.drop(df_thrust.columns[0], axis = 1, inplace = True)
-    # df_thrust['Wind speed'] = df_thrust.index
 
     df_thrust.reset_index(inplace = True)
-    df_thrust.sort_values(by = 'Wind speed')
-    # df_thrust = df_thrust.apply(float)
+    df_thrust.sort_values(by = 'Wind Speed')
 
-    st.dataframe(df_power)
+    df_thrust = df_thrust.astype(float)
+
 
     # We have to choose the columns with 1.225, and would they not exist, interpolate them
 
-    try:
-        st.line_chart(df_power)
-        pass
-        pass
-    except Exception as e:
-        print(e)
-        st.write('fuck')
+    if '1.225' not in df_power.columns.values:
+        ct_values = df_power.columns.values[1:].astype(float)
+        i = 0
+        for element in ct_values:
+            if element < 1.225:
+                i += 1
+                continue
+            else:
+                minor_ct = ct_values[i]
+                major_ct = ct_values[i+1]
+        
+        df_power['1.225'] = df_power[[str(minor_ct), str(major_ct)]].mean(axis=1)
 
-
-
-
-
-
+    if '1.225' not in df_thrust.columns.values:
+        ct_values = df_thrust.columns.values[1:].astype(float)
+        i = 0
+        for element in ct_values:
+            if element < 1.225:
+                i += 1
+                continue
+            else:
+                minor_ct = ct_values[i]
+                major_ct = ct_values[i+1]
+        
+        df_thrust['1.225'] = df_thrust[[str(minor_ct), str(major_ct)]].mean(axis=1)
 
     return df_power, df_thrust
+
+def duplicateDoc():
+
+    filemodelo = "resources/model/Wind report template.docx"
+
+    return Document(filemodelo)
+
+def resize_image(image, max_width):
+    width, height = image.size
+    if width > max_width:
+        ratio = max_width / width
+        new_width = max_width
+        new_height = int(height * ratio)
+        return image.resize((new_width, new_height))
+    return image
+
+@st.cache_data
+def insert_image_in_cell(doc, picDict):
+
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                if ("aerialCut" in cell.text):
+                    imagen = Image.open(picDict['location'])
+                    size = imagen.size
+                    imWidth = float(size[0])
+                    imHeight = float(size[1])                    
+                    if imWidth > 16.55:
+                        imHeight = imHeight*16.55/imWidth
+                        imWidth = 16.55
+                    image_io = io.BytesIO()
+                    imagen.save(image_io, format = 'PNG')
+                    image_io.seek(0)
+                    cell.text = ""
+                    cell_paragraph = cell.paragraphs[0]
+                    run = cell_paragraph.add_run()
+                    run.add_picture(image_io, width = Cm(imWidth), height = Cm(imHeight))
+                if ("powerCurvePic" in cell.text):
+                    imagen = Image.open(picDict['powerCurvePic'])
+                    size = imagen.size
+                    imWidth = float(size[0])
+                    imHeight = float(size[1])                    
+                    if imWidth > 16.55:
+                        imHeight = imHeight*16.55/imWidth
+                        imWidth = 16.55
+                    image_io = io.BytesIO()
+                    imagen.save(image_io, format = 'PNG')
+                    image_io.seek(0)
+                    cell.text = ""
+                    cell_paragraph = cell.paragraphs[0]
+                    run = cell_paragraph.add_run()
+                    run.add_picture(image_io, width = Cm(imWidth), height = Cm(imHeight))
+                if ("layWFout" in cell.text):
+                    imagen = Image.open(picDict['layout'])
+                    size = imagen.size
+                    imWidth = float(size[0])
+                    imHeight = float(size[1])                    
+                    if imWidth > 16.55:
+                        imHeight = imHeight*16.55/imWidth
+                        imWidth = 16.55
+                    image_io = io.BytesIO()
+                    imagen.save(image_io, format = 'PNG')
+                    image_io.seek(0)
+                    cell.text = ""
+                    cell_paragraph = cell.paragraphs[0]
+                    run = cell_paragraph.add_run()
+                    run.add_picture(image_io, width = Cm(imWidth), height = Cm(imHeight))  
+                if ("windHeatMap" in cell.text):
+                    imagen = Image.open(picDict['wind resource'])
+                    size = imagen.size
+                    imWidth = float(size[0])
+                    imHeight = float(size[1])                    
+                    if imWidth > 16.55:
+                        imHeight = imHeight*16.55/imWidth
+                        imWidth = 16.55
+                    image_io = io.BytesIO()
+                    imagen.save(image_io, format = 'PNG')
+                    image_io.seek(0)
+                    cell.text = ""
+                    cell_paragraph = cell.paragraphs[0]
+                    run = cell_paragraph.add_run()
+                    run.add_picture(image_io, width = Cm(imWidth), height = Cm(imHeight))  
+                if ("turbulenceHeatMap" in cell.text):
+                    imagen = Image.open(picDict['turbulence'])
+                    size = imagen.size
+                    imWidth = float(size[0])
+                    imHeight = float(size[1])                    
+                    if imWidth > 16.55:
+                        imHeight = imHeight*16.55/imWidth
+                        imWidth = 16.55
+                    image_io = io.BytesIO()
+                    imagen.save(image_io, format = 'PNG')
+                    image_io.seek(0)
+                    cell.text = ""
+                    cell_paragraph = cell.paragraphs[0]
+                    run = cell_paragraph.add_run()
+                    run.add_picture(image_io, width = Cm(imWidth), height = Cm(imHeight))                                                           
+    
+    st.session_state.picsDone = True
+    
+@st.cache_data
+def docWriter(docxFile,docxDict):
+
+    #Headers
+    for section in docxFile.sections:
+        for table in section.header.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        for word in docxDict:
+                            if word in paragraph.text:
+                                paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                                paragraph.style = docxFile.styles['headerBlue'] 
+
+
+    #Cover
+    '''
+    for paragraph in docxFile.paragraphs:
+        for word in docxDict:
+            if word in paragraph.text:
+                if ((word =="municipioProjC") or (word =="provinciaProjC") or (word =="ccaaProjC") or (word =="dateCoverC") or (word =="versionDocC")) and (paragraph.style.name == "CoverLight"):
+                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                    paragraph.style = docxFile.styles['CoverLight'] 
+                elif ((word=="potPicoC") or (word == "potInstaladaC") or (word == "nombreProyectoC")) and (paragraph.style.name == "CoverBold"):
+                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                    paragraph.style = docxFile.styles['CoverBold']
+                else: pass
+    '''
+    #Table values in general
+
+    for table in docxFile.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    previousStyle = paragraph.style
+                    for word in docxDict:
+                        if word in paragraph.text:
+                            paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                            paragraph.style = previousStyle  
+
+    
+        #Resto del documento
+    for paragraph in docxFile.paragraphs:
+        for word in docxDict:
+            if word in paragraph.text:
+                previousStyle = paragraph.style
+                paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                paragraph.style = previousStyle 
+                '''
+                if word == "FlagReference":
+                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                    paragraph.style = docxFile.styles['tableCaption']
+
+                if word == "FlagFigRef":
+                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                    paragraph.style = docxFile.styles['figureCaption']                         
+                elif word == "trafoLongTab":
+                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                    paragraph.style = docxFile.styles['bulletDoc']
+
+                elif ((word=="totalLetraIvaP") or  (word=="totalLetraPrecioIva")):
+                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                    paragraph.style = docxFile.styles['normalBold']
+
+                else:
+                    previousStyle = paragraph.style
+                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
+                    paragraph.style = previousStyle
+                '''
+
+    st.session_state.wordsDone = True
+    st.session_state.tablesDone = True
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
