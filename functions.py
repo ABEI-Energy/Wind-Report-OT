@@ -60,11 +60,11 @@ def textreaderFurow(file):
     # Get first dataframe
 
     df1 = df.copy()
-    df1 = df1['Turbine ID','X [m]','Y [m]','Terrain Elevation [m]','Nearest Turbine ID','Distance to the nearest Turbine [m]']
+    df1 = df1[['Turbine ID','X [m]','Y [m]','Terrain Elevation [m]','Nearest Turbine ID','Distance to the nearest Turbine [m]']]
 
 
     df2 = df.copy()
-    df2 = df2['Turbine ID','Capacity [kW]','Mean Free [m/s]','Gross Yield [MWh]','Wake losses (%)','Net Yield [MWh]', 'Net Capacity factor [%]', 'Net Full load hours [h]']
+    df2 = df2[['Turbine ID','Capacity [kW]','Mean Free [m/s]','Gross Yield [MWh]','Wake losses (%)','Net Yield [MWh]', 'Net Capacity factor [%]', 'Net Full load hours [h]']]
 
     return dictFurow, df, df1, df2
 
@@ -384,27 +384,7 @@ def docWriter(docxFile,docxDict):
                 previousStyle = paragraph.style.name
                 paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
                 paragraph.style = docxFile.styles[previousStyle] 
-                '''
-                if word == "FlagReference":
-                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
-                    paragraph.style = docxFile.styles['tableCaption']
 
-                if word == "FlagFigRef":
-                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
-                    paragraph.style = docxFile.styles['figureCaption']                         
-                elif word == "trafoLongTab":
-                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
-                    paragraph.style = docxFile.styles['bulletDoc']
-
-                elif ((word=="totalLetraIvaP") or  (word=="totalLetraPrecioIva")):
-                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
-                    paragraph.style = docxFile.styles['normalBold']
-
-                else:
-                    previousStyle = paragraph.style
-                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
-                    paragraph.style = previousStyle
-                '''
 
     st.session_state.wordsDone = True
     st.session_state.tablesDone = True
@@ -414,7 +394,7 @@ def docTabler(docxFile, df1, df2):
         for row in table.rows:
             for cell in row.cells:
                 if "flagDf1" in cell.text:
-                    cellStyle = cell.paragraphs[0].style
+                    cellStyle = cell.paragraphs[0].style.name
                     cell.text = ""
                     cell.style = docxFile.styles[cellStyle]
                     for i in range(len(df1)-1):
@@ -422,14 +402,14 @@ def docTabler(docxFile, df1, df2):
 
                     for i in range(df1.shape[0]):
                         for j in range(df1.shape[-1]):
-                            previousStyle = cell.paragraphs[0].style
+                            previousStyle = cell.paragraphs[0].style.name
 
                             table.cell(i+1,j).paragraphs[0].text = str(df1.values[i,j])
 
                             table.cell(i+1,j).paragraphs[0].style = docxFile.styles[previousStyle]  
 
                 if "flagDf2" in cell.text:
-                    cellStyle = cell.paragraphs[0].style
+                    cellStyle = cell.paragraphs[0].style.name
                     cell.text = ""
                     cell.style = docxFile.styles[cellStyle]
                     for i in range(len(df2)-1):
@@ -437,12 +417,12 @@ def docTabler(docxFile, df1, df2):
 
                     for i in range(df2.shape[0]):
                         for j in range(df2.shape[-1]):
-                            previousStyle = cell.paragraphs[0].style
+                            previousStyle = cell.paragraphs[0].style.name
 
-                            table.cell(i+1,j).paragraphs[0].text = str(df1.values[i,j])
+                            table.cell(i+1,j).paragraphs[0].text = str(df2.values[i,j])
 
                             table.cell(i+1,j).paragraphs[0].style = docxFile.styles[previousStyle]
-                            
+
     st.session_state.tablerDone = True
 
 
