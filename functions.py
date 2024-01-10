@@ -363,18 +363,18 @@ def docWriter(docxFile,docxDict):
                     # previousStyle = paragraph.style
                     for word in docxDict:
                         if word in paragraph.text:
-                            previousStyle = paragraph.style
+                            previousStyle = paragraph.style.name
                             paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
-                            paragraph.style = previousStyle  
+                            paragraph.style = docxFile.styles[previousStyle]   
 
     
         #Resto del documento
     for paragraph in docxFile.paragraphs:
         for word in docxDict:
             if word in paragraph.text:
-                previousStyle = paragraph.style
+                previousStyle = paragraph.style.name
                 paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
-                paragraph.style = previousStyle 
+                paragraph.style = docxFile.styles[previousStyle] 
                 '''
                 if word == "FlagReference":
                     paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
