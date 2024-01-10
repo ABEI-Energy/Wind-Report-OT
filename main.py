@@ -196,14 +196,11 @@ flagDone = False
 
 stDict['numYears'] = st.selectbox('Years of the historical data', range(1,15))
 
-if flagDict:
-
-    flagDone = dictMaker(stDict, stDict['softwareWind'], df)
 
 
 #flagDone es lo que indica que ya se ha hecho todo el tx pero falta pasar todo al word
 
-if flagDone:
+if flagDict:
 
     st.divider()
 
@@ -223,15 +220,22 @@ if st.session_state.generarDocumento:
 
     with st.spinner('Preparing document'):
 
-        # First, we insert pictures
+        dictMaker(stDict, stDict['softwareWind'], df)
+
+        # st.dataframe(stDict)
 
         insert_image_in_cell(doc_file, picDict)
         docWriter(doc_file, stDict)
         doc_modelo_bio = io.BytesIO()
         doc_file.save(doc_modelo_bio)
         doc_modelo_bio.seek(0)
-        st.session_state.documentDone = True
-        pass
+        if st.session_state.picsDone and st.session_state.wordsDone and st.session_state.tablesDone: 
+            st.session_state.documentDone = True
+            st.session_state.picsDone = False
+            st.session_state.wordsDone = False
+            st.session_state.tablesDone = False
+
+        
 
 if st.session_state.documentDone:
         
@@ -241,6 +245,7 @@ if st.session_state.documentDone:
             file_name="hola.docx",
             mime="application/zip"
         )
+    st.session_state.documentDone = False
         
 
 

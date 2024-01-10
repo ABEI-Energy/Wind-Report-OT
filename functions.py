@@ -15,7 +15,7 @@ from docx.shared import Cm
 import io
 
 
-lc.setlocale(lc.LC_ALL,'es_ES.UTF-8')
+lc.setlocale(lc.LC_ALL,'en_EN.UTF-8')
 
 month = dt.datetime.now().strftime("%B %Y")
 year = month.split(' ')[-1]
@@ -89,6 +89,8 @@ def dictMaker(dict, program, df):
         get_elevation(dict)
 
         dict.update(dict)
+
+        st.dataframe(dict)
 
         st.session_state.dict = True
 
@@ -242,7 +244,6 @@ def resize_image(image, max_width):
         return image.resize((new_width, new_height))
     return image
 
-@st.cache_data
 def insert_image_in_cell(doc, picDict):
 
     for table in doc.tables:
@@ -326,7 +327,6 @@ def insert_image_in_cell(doc, picDict):
     
     st.session_state.picsDone = True
     
-@st.cache_data
 def docWriter(docxFile,docxDict):
 
     #Headers
@@ -360,9 +360,10 @@ def docWriter(docxFile,docxDict):
         for row in table.rows:
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
-                    previousStyle = paragraph.style
+                    # previousStyle = paragraph.style
                     for word in docxDict:
                         if word in paragraph.text:
+                            previousStyle = paragraph.style
                             paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
                             paragraph.style = previousStyle  
 
