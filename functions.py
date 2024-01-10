@@ -394,15 +394,16 @@ def docTabler(docxFile, df1, df2):
         for row in table.rows:
             for cell in row.cells:
                 if "flagDf1" in cell.text:
-                    cellStyle = cell.paragraphs[0].style.name
                     cell.text = ""
-                    cell.style = docxFile.styles[cellStyle]
                     for i in range(len(df1)-1):
                         table.add_row()
 
                     for i in range(df1.shape[0]):
                         for j in range(df1.shape[-1]):
-                            previousStyle = cell.paragraphs[0].style.name
+                            if j == 0:
+                                previousStyle = docxFile.style['tableBlueLeft']
+                            else:
+                                previousStyle = cell.paragraphs[0].style.name
 
                             table.cell(i+1,j).paragraphs[0].text = str(df1.values[i,j])
 
@@ -417,7 +418,10 @@ def docTabler(docxFile, df1, df2):
 
                     for i in range(df2.shape[0]):
                         for j in range(df2.shape[-1]):
-                            previousStyle = cell.paragraphs[0].style.name
+                            if j == 0:
+                                previousStyle = docxFile.style['tableBlueLeft']
+                            else:
+                                previousStyle = cell.paragraphs[0].style.name
 
                             table.cell(i+1,j).paragraphs[0].text = str(df2.values[i,j])
 
