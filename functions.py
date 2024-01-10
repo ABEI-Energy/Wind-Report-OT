@@ -54,10 +54,19 @@ def textreaderFurow(file):
     dictFurow['wakeLoss'] = df['Array Efficiency [%]'].apply(float).mean()
 
     # Calculamos el centroide del parque
-    dictFurow['latUTMProj'] = df['Y [m]'].apply(float).sum()/df['Y [m]'].count()
-    dictFurow['longUTMProj'] = df['X [m]'].apply(float).sum()/df['X [m]'].count()    
+    dictFurow['latUTMProj'] = round(df['Y [m]'].apply(float).sum()/df['Y [m]'].count(),2)
+    dictFurow['longUTMProj'] = round(df['X [m]'].apply(float).sum()/df['X [m]'].count(),2) 
 
-    return dictFurow, df
+    # Get first dataframe
+
+    df1 = df.copy()
+    df1 = df1['Turbine ID','X [m]','Y [m]','Terrain Elevation [m]','Nearest Turbine ID','Distance to the nearest Turbine [m]']
+
+
+    df2 = df.copy()
+    df2 = df2['Turbine ID','Capacity [kW]','Mean Free [m/s]','Gross Yield [MWh]','Wake losses (%)','Net Yield [MWh]', 'Net Capacity factor [%]', 'Net Full load hours [h]']
+
+    return dictFurow, df, df1, df2
 
 @st.cache_data
 def dictMaker(dict, program, df):
@@ -140,8 +149,8 @@ def utm_to_latLon(dict):
     huso = int(dict['husoUTM'].split(' ')[0])
     zone = dict['husoUTM'].split(' ')[-1].strip()
     coordinates = utm.to_latlon(long_utm, lat_utm, huso, zone)
-    dict['latProj'] = coordinates[0]
-    dict['longProj'] = coordinates[-1]
+    dict['latProj'] = round(coordinates[0],2)
+    dict['longProj'] = round(coordinates[-1],2)
     dict.update(dict)
 
 @st.cache_data
@@ -399,9 +408,42 @@ def docWriter(docxFile,docxDict):
 
     st.session_state.wordsDone = True
     st.session_state.tablesDone = True
-      
 
+def docTabler(docxFile, df1, df2):
+    for table in docxFile.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                if "flagDf1" in cell.text:
+                    cellStyle = cell.paragraphs[0].style
+                    cell.text = ""
+                    cell.style = docxFile.styles[cellStyle]
+                    for i in range(len(df1)-1):
+                        table.add_row()
 
+                    for i in range(df1.shape[0]):
+                        for j in range(df1.shape[-1]):
+                            previousStyle = cell.paragraphs[0].style
+
+                            table.cell(i+1,j).paragraphs[0].text = str(df1.values[i,j])
+
+                            table.cell(i+1,j).paragraphs[0].style = docxFile.styles[previousStyle]  
+
+                if "flagDf2" in cell.text:
+                    cellStyle = cell.paragraphs[0].style
+                    cell.text = ""
+                    cell.style = docxFile.styles[cellStyle]
+                    for i in range(len(df2)-1):
+                        table.add_row()
+
+                    for i in range(df2.shape[0]):
+                        for j in range(df2.shape[-1]):
+                            previousStyle = cell.paragraphs[0].style
+
+                            table.cell(i+1,j).paragraphs[0].text = str(df1.values[i,j])
+
+                            table.cell(i+1,j).paragraphs[0].style = docxFile.styles[previousStyle]
+                            
+    st.session_state.tablerDone = True
 
 
 

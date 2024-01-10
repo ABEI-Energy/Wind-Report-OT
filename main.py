@@ -29,6 +29,7 @@ if 'finalCheck' not in st.session_state:
     st.session_state['tablesDone'] = None
     st.session_state['wordsDone'] = None
     st.session_state['documentDone'] = None
+    st.session_state['tablerDone'] = None
 
 """
 # Wind report
@@ -83,7 +84,7 @@ for uploadedFile in uploadedFiles:
 
         stDict['softwareWind'] = 'Furow'
 
-        dict, df = textreaderFurow(uploadedFile)
+        dict, df, df1, df2 = textreaderFurow(uploadedFile)
 
         stDict.update(dict)
         
@@ -226,14 +227,16 @@ if st.session_state.generarDocumento:
 
         insert_image_in_cell(doc_file, picDict)
         docWriter(doc_file, stDict)
+        docTabler(doc_file, df1, df2)
         doc_modelo_bio = io.BytesIO()
         doc_file.save(doc_modelo_bio)
         doc_modelo_bio.seek(0)
-        if st.session_state.picsDone and st.session_state.wordsDone and st.session_state.tablesDone: 
+        if st.session_state.picsDone and st.session_state.wordsDone and st.session_state.tablesDone and st.session_state.tablerDone: 
             st.session_state.documentDone = True
             st.session_state.picsDone = False
             st.session_state.wordsDone = False
             st.session_state.tablesDone = False
+            st.session_state.tablerDone = False
 
         
 
