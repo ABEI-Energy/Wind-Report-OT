@@ -23,6 +23,7 @@ class pict:
 st.set_page_config(layout="wide")
 
 if 'finalCheck' not in st.session_state:
+    st.session_state['dict'] = False
     st.session_state['finalCheck'] = None
     st.session_state['generarDocumento'] = None
     st.session_state['picsDone'] = None
@@ -221,9 +222,8 @@ if st.session_state.generarDocumento:
 
     with st.spinner('Preparing document'):
 
-        dictMaker(stDict, stDict['softwareWind'], df)
-
-        # st.dataframe(stDict)
+        if not st.session_state.dict:
+            dictMaker(stDict, stDict['softwareWind'], df)
 
         insert_image_in_cell(doc_file, picDict)
         docWriter(doc_file, stDict)
@@ -231,21 +231,21 @@ if st.session_state.generarDocumento:
         doc_modelo_bio = io.BytesIO()
         doc_file.save(doc_modelo_bio)
         doc_modelo_bio.seek(0)
-        if st.session_state.picsDone and st.session_state.wordsDone and st.session_state.tablesDone and st.session_state.tablerDone: 
+        if st.session_state.picsDone and st.session_state.wordsDone and st.session_state.tablesDone and st.session_state.dict: 
             st.session_state.documentDone = True
             st.session_state.picsDone = False
             st.session_state.wordsDone = False
             st.session_state.tablesDone = False
-            st.session_state.tablerDone = False
+            st.session_state.dict = False
 
         
 
 if st.session_state.documentDone:
-        
+    nameDoc = stDict['nameWF'] + ' ' + stDict['powerWF'] + ' MW'  + '.docx'
     btn = st.download_button(
             label="Descarga archivos",
             data=doc_modelo_bio,
-            file_name="hola.docx",
+            file_name=nameDoc,
             mime="application/zip"
         )
     st.session_state.documentDone = False

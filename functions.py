@@ -52,7 +52,7 @@ def textreaderFurow(file):
 
     # Añadimos coordenadas de 
 
-    dictFurow['wakeLoss'] = df['Array Efficiency [%]'].apply(float).mean()
+    dictFurow['wakeLoss'] = round(df['Array Efficiency [%]'].apply(float).mean(),2)
 
     # Calculamos el centroide del parque
     dictFurow['latUTMProj'] = round(df['Y [m]'].apply(float).sum()/df['Y [m]'].count(),2)
@@ -78,7 +78,8 @@ def dictMaker(dict, program, df):
     
     
     if program == 'Furow':
-    
+        
+        dict['turbulenceIntensity'] = dict.pop('Total TI [%]')
         dict['equivalentHours'] = dict.pop('Net Full load hours [h]')
         dict['husoUTM'] = dict.pop('UTM Zone')
         dict['powerWF'] = dict.pop('Total Capacity Installed [MW]')
@@ -103,14 +104,9 @@ def dictMaker(dict, program, df):
 
         dict.update(dict)
 
-        st.dataframe(dict)
-
         st.session_state.dict = True
 
         return True
-
-
-
 
 
     else:
@@ -384,7 +380,7 @@ def docTabler(docxFile, df1, df2):
             for cell in row.cells:
                 if "flagDf1" in cell.text:
                     cell.text = "turbine ID"
-                    for i in range(len(df1)-1):
+                    for i in range(len(df1)):
                         table.add_row()
                         table.style = 'tableBlue'
 
@@ -397,7 +393,7 @@ def docTabler(docxFile, df1, df2):
                 if "flagDf2" in cell.text:
                     cellStyle = cell.paragraphs[0].style.name
                     cell.text = "turbine ID"
-                    for i in range(len(df2)-1):
+                    for i in range(len(df2)):
                         table.add_row()
                         table.style = 'tableBlue'
 
