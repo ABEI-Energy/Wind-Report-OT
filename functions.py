@@ -15,7 +15,7 @@ from docx.shared import Cm
 import io
 
 
-lc.setlocale(lc.LC_ALL,'en_EN.UTF-8')
+lc.setlocale(lc.LC_ALL,'en_US.UTF-8')
 
 month = dt.datetime.now().strftime("%B %Y")
 year = month.split(' ')[-1]
