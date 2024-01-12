@@ -25,7 +25,7 @@ def textreaderFurow(file):
 
     dictFurow = dict()
 
-    lines = file.getvalue().decode('ANSI').split('\r\n')
+    lines = file.getvalue().decode('utf_8').split('\r\n')
 
     lines = [line.strip().split('\t') for line in lines]
 
