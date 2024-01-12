@@ -47,7 +47,8 @@ def textreaderFurow(file):
         if len(row)!=1:
             df.loc[len(df)] = row
     
-    df['Wake losses (%)'] = 100 - df['Array Efficiency [%]'].apply(float)
+    df['Wake losses (%)'] = round(100 - df['Array Efficiency [%]'].apply(float),2)
+
 
     # Añadimos coordenadas de 
 
@@ -58,10 +59,9 @@ def textreaderFurow(file):
     dictFurow['longUTMProj'] = round(df['X [m]'].apply(float).sum()/df['X [m]'].count(),2) 
 
     # Get first dataframe
-
+    df['Turbine ID'] = 'WT ' + df['Turbine ID']
     df1 = df.copy()
     df1 = df1[['Turbine ID','X [m]','Y [m]','Terrain Elevation [m]','Nearest Turbine ID','Distance to the nearest Turbine [m]']]
-
 
     df2 = df.copy()
     df2 = df2[['Turbine ID','Capacity [kW]','Mean Free [m/s]','Gross Yield [MWh]','Wake losses (%)','Net Yield [MWh]', 'Net Capacity factor [%]', 'Net Full load hours [h]']]
@@ -73,7 +73,7 @@ def dictMaker(dict, program, df):
 
     dict['dateTime'] = month
     dict['currentYear'] = year
-    dict['yearMinus'] = str(float(year) - float(dict['numYears']))
+    dict['yearMinus'] = str(int(float(year) - float(dict['numYears'])))
     dict['dateTable'] = dt.datetime.now().strftime("%d/%m/%y")
     
     
@@ -92,6 +92,10 @@ def dictMaker(dict, program, df):
         dict['hubHeight'] = df['Hub Height [m]'].unique()[0]
         dict['rotorSize'] = df['Rotor Diameter [m]'].unique()[0]
         dict['turbinePower'] = df['Capacity [kW]'].unique()[0]
+        dict.pop('Wind Farm')
+        dict['powerWF'] = dict['powerWF'].strip('0')
+        dict['turbinePower'] = str(float(dict['turbinePower'].strip('0'))/1000)
+
 
         utm_to_latLon(dict)
 
@@ -140,7 +144,7 @@ def get_elevation(dict):
    
     elevation = response['results'][0]['elevation']
 
-    dict['altProj'] = elevation
+    dict['altProj'] = round(elevation, 2)
 
 @st.cache_data
 def utm_to_latLon(dict):
@@ -350,21 +354,6 @@ def docWriter(docxFile,docxDict):
                                 paragraph.style = docxFile.styles['headerBlue'] 
 
 
-    #Cover
-    '''
-    for paragraph in docxFile.paragraphs:
-        for word in docxDict:
-            if word in paragraph.text:
-                if ((word =="municipioProjC") or (word =="provinciaProjC") or (word =="ccaaProjC") or (word =="dateCoverC") or (word =="versionDocC")) and (paragraph.style.name == "CoverLight"):
-                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
-                    paragraph.style = docxFile.styles['CoverLight'] 
-                elif ((word=="potPicoC") or (word == "potInstaladaC") or (word == "nombreProyectoC")) and (paragraph.style.name == "CoverBold"):
-                    paragraph.text = paragraph.text.replace(word,str(docxDict[word]))
-                    paragraph.style = docxFile.styles['CoverBold']
-                else: pass
-    '''
-    #Table values in general
-
     for table in docxFile.tables:
         for row in table.rows:
             for cell in row.cells:
@@ -394,38 +383,29 @@ def docTabler(docxFile, df1, df2):
         for row in table.rows:
             for cell in row.cells:
                 if "flagDf1" in cell.text:
-                    cell.text = ""
+                    cell.text = "turbine ID"
                     for i in range(len(df1)-1):
                         table.add_row()
+                        table.style = 'tableBlue'
 
                     for i in range(df1.shape[0]):
                         for j in range(df1.shape[-1]):
-                            if j == 0:
-                                previousStyle = docxFile.style['tableBlueLeft']
-                            else:
-                                previousStyle = cell.paragraphs[0].style.name
-
                             table.cell(i+1,j).paragraphs[0].text = str(df1.values[i,j])
 
-                            table.cell(i+1,j).paragraphs[0].style = docxFile.styles[previousStyle]  
+                    table.style = 'tableBlue'
 
                 if "flagDf2" in cell.text:
                     cellStyle = cell.paragraphs[0].style.name
-                    cell.text = ""
-                    cell.style = docxFile.styles[cellStyle]
+                    cell.text = "turbine ID"
                     for i in range(len(df2)-1):
                         table.add_row()
+                        table.style = 'tableBlue'
 
                     for i in range(df2.shape[0]):
                         for j in range(df2.shape[-1]):
-                            if j == 0:
-                                previousStyle = docxFile.style['tableBlueLeft']
-                            else:
-                                previousStyle = cell.paragraphs[0].style.name
-
                             table.cell(i+1,j).paragraphs[0].text = str(df2.values[i,j])
 
-                            table.cell(i+1,j).paragraphs[0].style = docxFile.styles[previousStyle]
+                    table.style = 'tableBlue'
 
     st.session_state.tablerDone = True
 
