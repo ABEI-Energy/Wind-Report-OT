@@ -1,0 +1,9 @@
+Country,territorial1Key,territorial2Key,territorial3Key
+USA,State,County,City
+UK,Country,County,City
+France,Regionne,Departement,Localitè-Commune
+Germany, , , 
+Mexico, , , 
+Poland, , , 
+Spain,CCAA,Provincia,Municipio
+Italy, , , 
