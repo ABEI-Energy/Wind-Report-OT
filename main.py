@@ -68,7 +68,7 @@ with colx:
 with coly:
 
     st.caption("Example files")
-    with open("resources\Wind report files.zip", "rb") as fp:
+    with open("resources/Wind report files.zip", "rb") as fp:
         btn = st.download_button(
             label="Download example files",
             data=fp,
