@@ -155,7 +155,7 @@ def utm_to_latLon(dict):
 
 @st.cache_data
 def countryValues():
-    df_countries = pd.read_csv('countries.csv', index_col=None).sort_values(by='Country')
+    df_countries = pd.read_csv('resources/countries.csv', index_col=None).sort_values(by='Country')
     return df_countries
 
 @st.cache_data
@@ -238,9 +238,12 @@ def model_reader(directory):
 
     return df_power, df_thrust
 
-def duplicateDoc():
+def duplicateDoc(country):
 
-    filemodelo = "resources/model/Wind report template.docx"
+    if country == 'Spain':
+        filemodelo = "resources/model/Modelo informe viento.docx"
+    else:
+        filemodelo = "resources/model/Wind report template.docx"
 
     return Document(filemodelo)
 

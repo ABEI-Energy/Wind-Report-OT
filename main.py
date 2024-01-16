@@ -215,7 +215,7 @@ if flagDict:
 if st.session_state.finalCheck is not None:
 
     st.button("Generar documento", key = 'generarDocumento')
-    doc_file = duplicateDoc()
+    doc_file = duplicateDoc(country)
 
 
 if st.session_state.generarDocumento:
