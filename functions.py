@@ -17,7 +17,7 @@ import io
 
 lc.setlocale(lc.LC_ALL,'en_US.UTF-8')
 
-month = dt.datetime.now().strftime("%B %Y")
+month = dt.datetime.now().strftime("%B %Y").capitalize()
 year = month.split(' ')[-1]
 
 @st.cache_data
@@ -69,12 +69,20 @@ def textreaderFurow(file):
     return dictFurow, df, df1, df2
 
 @st.cache_data
-def dictMaker(dict, program, df):
+def dictMaker(dict, program, df, country):
+
+    if country == 'SPAIN':
+        lc.setlocale(lc.LC_ALL,'es_ES.UTF-8')
+        month = dt.datetime.now().strftime("%B %Y").capitalize()
+        year = month.split(' ')[-1]
+        tableDate = dt.datetime.now().strftime("%d/%m/%y")
+    else:
+        pass
 
     dict['dateTime'] = month
     dict['currentYear'] = year
     dict['yearMinus'] = str(int(float(year) - float(dict['numYears'])))
-    dict['dateTable'] = dt.datetime.now().strftime("%d/%m/%y")
+    dict['dateTable'] = tableDate
     
     
     if program == 'Furow':
@@ -240,7 +248,7 @@ def model_reader(directory):
 
 def duplicateDoc(country):
 
-    if country == 'Spain':
+    if country == 'SPAIN':
         filemodelo = "resources/model/Modelo informe viento.docx"
     else:
         filemodelo = "resources/model/Wind report template.docx"

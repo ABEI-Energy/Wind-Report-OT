@@ -223,7 +223,7 @@ if st.session_state.generarDocumento:
     with st.spinner('Preparing document'):
 
         if not st.session_state.dict:
-            dictMaker(stDict, stDict['softwareWind'], df)
+            dictMaker(stDict, stDict['softwareWind'], df, country)
 
         insert_image_in_cell(doc_file, picDict)
         docWriter(doc_file, stDict)
