@@ -1,7 +1,7 @@
 Country,territorial1Key,territorial2Key,territorial3Key
 USA,State,County,City
 UK,Country,County,City
-FRANCE,Région,Département,Ville
+FRANCE,Region,Department,City
 Germany, , , 
 Mexico, , , 
 Poland, , , 

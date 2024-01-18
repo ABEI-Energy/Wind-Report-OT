@@ -71,7 +71,7 @@ def textreaderFurow(file):
 @st.cache_data
 def dictMaker(dict, program, df, country):
 
-    if country == 'SPAIN':
+    if (country == 'SPAIN'):
         lc.setlocale(lc.LC_ALL,'es_ES.UTF-8')
         month = dt.datetime.now().strftime("%B %Y").capitalize()
         year = month.split(' ')[-1]
@@ -248,7 +248,7 @@ def model_reader(directory):
 
 def duplicateDoc(country):
 
-    if country == 'SPAIN':
+    if (country == 'SPAIN'):
         filemodelo = "resources/model/Modelo informe viento.docx"
     else:
         filemodelo = "resources/model/Wind report template.docx"
