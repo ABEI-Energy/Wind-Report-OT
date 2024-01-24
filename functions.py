@@ -77,7 +77,11 @@ def dictMaker(dict, program, df, country):
         year = month.split(' ')[-1]
         tableDate = dt.datetime.now().strftime("%d/%m/%y")
     else:
-        pass
+        lc.setlocale(lc.LC_ALL,'en_US.UTF-8')
+        month = dt.datetime.now().strftime("%B %Y").capitalize()
+        year = month.split(' ')[-1]
+        tableDate = dt.datetime.now().strftime("%d/%m/%y")
+    
 
     dict['dateTime'] = month
     dict['currentYear'] = year
