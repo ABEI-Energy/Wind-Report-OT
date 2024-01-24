@@ -2,8 +2,4 @@ Country,territorial1Key,territorial2Key,territorial3Key
 USA,State,County,City
 UK,Country,County,City
 FRANCE,Region,Department,City
-Germany, , , 
-Mexico, , , 
-Poland, , , 
 SPAIN,CCAA,Provincia,Municipio
-Italy, , , 
